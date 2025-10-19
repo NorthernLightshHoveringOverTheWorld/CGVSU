@@ -6,16 +6,58 @@ import javafx.scene.paint.Color;
 
 public class Rasterization {
 
-    public static void drawRectangle(
+    public static void drawEllipse(
             final GraphicsContext graphicsContext,
-            final int x, final int y,
-            final int width, final int height,
+            final int centerX, final int centerY,
+            final int a, final int b,
             final Color color)
     {
-        final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
+        final PixelWriter pw = graphicsContext.getPixelWriter();
 
-        for (int row = y; row < y + height; ++row)
-            for (int col = x; col < x + width; ++col)
-                pixelWriter.setColor(col, row, color);
+
+        double a2 = a * a;
+        double b2 = b * b;
+
+
+        int x = 0;
+        int y = b;
+        double sigma = 2 * b2 + a2 * (1 - 2 * b);
+
+        while (b2 * x <= a2 * y) {
+            drawSymmetricPixels(pw, centerX, centerY, x, y, color);
+
+            if (sigma >= 0) {
+                sigma += 4 * a2 * (1 - y);
+                y--;
+            }
+            sigma += b2 * ((4 * x) + 6);
+            x++;
+        }
+
+        // Вторая часть эллипса (где наклон > 1)
+        x = a;
+        y = 0;
+        sigma = 2 * a2 + b2 * (1 - 2 * a);
+
+        while (a2 * y <= b2 * x) {
+            drawSymmetricPixels(pw, centerX, centerY, x, y, color);
+
+            if (sigma >= 0) {
+                sigma += 4 * b2 * (1 - x);
+                x--;
+            }
+            sigma += a2 * ((4 * y) + 6);
+            y++;
+        }
+    }
+
+
+    private static void drawSymmetricPixels(
+            PixelWriter pw, int cx, int cy, int dx, int dy, Color color)
+    {
+        pw.setColor(cx + dx, cy + dy, color);
+        pw.setColor(cx - dx, cy + dy, color);
+        pw.setColor(cx + dx, cy - dy, color);
+        pw.setColor(cx - dx, cy - dy, color);
     }
 }
