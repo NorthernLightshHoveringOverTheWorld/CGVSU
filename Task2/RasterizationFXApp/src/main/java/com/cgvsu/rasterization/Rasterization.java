@@ -34,7 +34,7 @@ public class Rasterization {
             x++;
         }
 
-        // Вторая часть эллипса (где наклон > 1)
+
         x = a;
         y = 0;
         sigma = 2 * a2 + b2 * (1 - 2 * a);
